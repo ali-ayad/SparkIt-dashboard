@@ -13,7 +13,7 @@ import AdminLayout from "@/pages/admin/AdminLayout"
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="sparkit-theme">
+    <ThemeProvider defaultTheme="system" storageKey="sparkit-theme" attribute="class">
       <LanguageProvider>
         <BrowserRouter>
           <Routes>

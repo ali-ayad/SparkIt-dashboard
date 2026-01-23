@@ -3,6 +3,8 @@ import { Menu, Bell, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { ModeToggle } from "@/components/mode-toggle"
+import { UserNav } from "@/components/admin/user-nav"
 import { useLanguage } from "@/lib/language-context"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from "@/components/ui/sheet"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
@@ -51,6 +53,7 @@ export function AdminHeader() {
             <Search className="h-5 w-5" />
           </Button>
         </div>
+        <ModeToggle />
         <LanguageSwitcher />
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
@@ -58,6 +61,7 @@ export function AdminHeader() {
             3
           </span>
         </Button>
+        <UserNav />
       </div>
     </header>
   )
