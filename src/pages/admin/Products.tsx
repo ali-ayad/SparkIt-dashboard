@@ -8,8 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Plus, Search, Edit, Trash2 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ProductModal } from "@/components/admin/ProductModal"
+import type { Product } from "@/lib/types"
 
-const mockProducts = [
+const initialProducts: Product[] = [
   {
     id: 1,
     name: "iPhone 15 Pro Max",
@@ -20,6 +22,8 @@ const mockProducts = [
     stock: 45,
     status: "in-stock",
     image: "/modern-smartphone.png",
+    hasDiscount: true,
+    discountPercentage: 15,
   },
   {
     id: 2,
@@ -31,6 +35,8 @@ const mockProducts = [
     stock: 23,
     status: "in-stock",
     image: "/modern-laptop-workspace.png",
+    hasDiscount: false,
+    discountPercentage: 0,
   },
   {
     id: 3,
@@ -42,6 +48,8 @@ const mockProducts = [
     stock: 120,
     status: "in-stock",
     image: "/wireless-earbuds-charging-case.png",
+    hasDiscount: false,
+    discountPercentage: 0,
   },
   {
     id: 4,
@@ -53,6 +61,8 @@ const mockProducts = [
     stock: 0,
     status: "out-of-stock",
     image: "/modern-smartwatch.png",
+    hasDiscount: false,
+    discountPercentage: 0,
   },
   {
     id: 5,
@@ -64,26 +74,59 @@ const mockProducts = [
     stock: 34,
     status: "in-stock",
     image: "/modern-tablet-display.png",
+    hasDiscount: true,
+    discountPercentage: 10,
   },
 ]
 
 export default function ProductsPage() {
   const { language } = useLanguage()
   const t = adminTranslations[language].productsManagement
+  const [products, setProducts] = useState<Product[]>(initialProducts)
   const [searchQuery, setSearchQuery] = useState("")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
 
-  const filteredProducts = mockProducts.filter((product) =>
+  const filteredProducts = products.filter((product) =>
     language === "en"
       ? product.name.toLowerCase().includes(searchQuery.toLowerCase())
       : product.nameAr.includes(searchQuery),
   )
+
+  const handleAddProduct = () => {
+    setEditingProduct(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product)
+    setIsModalOpen(true)
+  }
+
+  const handleDeleteProduct = (id: number) => {
+    if (confirm(language === "en" ? "Are you sure you want to delete this product?" : "هل أنت متأكد من حذف هذا المنتج؟")) {
+      setProducts(products.filter((p) => p.id !== id))
+    }
+  }
+
+  const handleSaveProduct = (product: Product) => {
+    if (editingProduct) {
+      setProducts(products.map((p) => (p.id === editingProduct.id ? { ...product, id: p.id } : p)))
+    } else {
+      const newProduct = {
+        ...product,
+        id: Math.max(0, ...products.map((p) => p.id || 0)) + 1,
+      }
+      setProducts([...products, newProduct])
+    }
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">{t.title}</h1>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleAddProduct}>
           <Plus className="h-4 w-4" />
           {t.addProduct}
         </Button>
@@ -140,16 +183,23 @@ export default function ProductsPage() {
                     <TableCell>${product.price}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
-                      <Badge variant={product.status === "in-stock" ? "default" : "destructive"}>
-                        {product.status === "in-stock" ? t.inStock : t.outOfStock}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={product.status === "in-stock" ? "default" : "destructive"}>
+                          {product.status === "in-stock" ? t.inStock : t.outOfStock}
+                        </Badge>
+                        {product.hasDiscount && (
+                          <Badge variant="outline" className="border-orange-500 text-orange-500 bg-orange-50">
+                            -{product.discountPercentage}%
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => product.id && handleDeleteProduct(product.id)}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
@@ -161,6 +211,13 @@ export default function ProductsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ProductModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveProduct}
+        product={editingProduct}
+      />
     </div>
   )
 }

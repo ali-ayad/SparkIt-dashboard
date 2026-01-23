@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { LayoutDashboard, Package, ShoppingCart, Users, BarChart3, Settings, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, Layers, ShoppingCart, Users, BarChart3, Settings, LogOut } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { adminTranslations } from "@/lib/translations"
 import { cn } from "@/lib/utils"
@@ -20,6 +20,7 @@ export function AdminSidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: t.dashboard, href: "/admin/dashboard" },
     { icon: Package, label: t.products, href: "/admin/products" },
+    { icon: Layers, label: t.categories, href: "/admin/categories" },
     { icon: ShoppingCart, label: t.orders, href: "/admin/orders" },
     { icon: Users, label: t.customers, href: "/admin/customers" },
     { icon: BarChart3, label: t.analytics, href: "/admin/analytics" },

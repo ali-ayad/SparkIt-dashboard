@@ -8,6 +8,7 @@ import Analytics from "@/pages/admin/Analytics"
 import Customers from "@/pages/admin/Customers"
 import Orders from "@/pages/admin/Orders"
 import Products from "@/pages/admin/Products"
+import Categories from "@/pages/admin/Categories"
 import Settings from "@/pages/admin/Settings"
 import AdminLayout from "@/pages/admin/AdminLayout"
 
@@ -28,6 +29,7 @@ function App() {
               <Route path="customers" element={<Customers />} />
               <Route path="orders" element={<Orders />} />
               <Route path="products" element={<Products />} />
+              <Route path="categories" element={<Categories />} />
               <Route path="settings" element={<Settings />} />
             </Route>
             
