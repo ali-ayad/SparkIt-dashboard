@@ -1,12 +1,13 @@
-
+import { useState } from "react"
 import { useLanguage } from "@/lib/language-context"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DataTablePage } from "@/components/admin/DataTablePage"
+import { DataTable, type Column } from "@/components/admin/DataTable"
+import { Eye, Edit, Trash2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import type { Customer } from "@/lib/types"
 
-const mockCustomers = [
+const mockCustomers: Customer[] = [
   { id: 1, name: "Ahmed Hassan", email: "ahmed@example.com", orders: 12, spent: 3450 },
   { id: 2, name: "Sarah Johnson", email: "sarah@example.com", orders: 8, spent: 2100 },
   { id: 3, name: "Mohammed Ali", email: "mohammed@example.com", orders: 15, spent: 5200 },
@@ -16,68 +17,91 @@ const mockCustomers = [
 
 export default function CustomersPage() {
   const { language } = useLanguage()
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredCustomers = mockCustomers.filter((customer) =>
+    customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  const columns: Column<Customer>[] = [
+    {
+      header: language === "en" ? "Customer" : "العميل",
+      className: "px-6",
+      headerClassName: "px-6",
+      cell: (customer) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9 border border-muted-foreground/10 bg-muted/20">
+            <AvatarFallback className="bg-transparent text-primary text-[10px] font-bold uppercase">
+              {customer.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col text-left leading-none gap-0.5">
+            <span className="text-sm font-semibold text-foreground">{customer.name}</span>
+            <span className="text-[10px] text-muted-foreground">ID: #{customer.id}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      header: language === "en" ? "Email" : "البريد الإلكتروني",
+      cell: (customer) => (
+        <span className="text-xs text-muted-foreground">
+          {customer.email}
+        </span>
+      ),
+    },
+    {
+      header: language === "en" ? "Orders" : "الطلبات",
+      cell: (customer) => (
+        <span className="text-sm font-medium text-foreground">
+          {customer.orders} <span className="text-[10px] text-muted-foreground ml-0.5">ORDERS</span>
+        </span>
+      ),
+    },
+    {
+      header: language === "en" ? "Total Spent" : "إجمالي الإنفاق",
+      cell: (customer) => (
+        <span className="text-sm font-semibold text-foreground">
+          ${customer.spent.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      header: language === "en" ? "Actions" : "الإجراءات",
+      headerClassName: "px-6",
+      className: "px-6",
+      cell: () => (
+        <div className="flex justify-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{language === "en" ? "Customers" : "العملاء"}</h1>
-      </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={language === "en" ? "Search customers..." : "البحث عن العملاء..."}
-              className="pl-9"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{language === "en" ? "All Customers" : "جميع العملاء"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "en" ? "Customer" : "العميل"}</TableHead>
-                  <TableHead>{language === "en" ? "Email" : "البريد الإلكتروني"}</TableHead>
-                  <TableHead>{language === "en" ? "Orders" : "الطلبات"}</TableHead>
-                  <TableHead>{language === "en" ? "Total Spent" : "إجمالي الإنفاق"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockCustomers.map((customer) => (
-                  <TableRow key={customer.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback>
-                            {customer.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{customer.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.orders}</TableCell>
-                    <TableCell className="font-medium">${customer.spent}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <DataTablePage
+      title={language === "en" ? "Customers" : "العملاء"}
+      searchPlaceholder={language === "en" ? "Search customers..." : "البحث عن العملاء..."}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+    >
+      <DataTable
+        columns={columns}
+        data={filteredCustomers}
+        emptyMessage={language === "en" ? "No customers found." : "لا توجد عملاء."}
+      />
+    </DataTablePage>
   )
 }
-

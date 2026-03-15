@@ -1,14 +1,12 @@
-
 import { useState } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { adminTranslations } from "@/lib/translations"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, Edit, Trash2 } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Edit, Trash2, Eye } from "lucide-react"
 import { ProductModal } from "@/components/admin/ProductModal"
+import { DataTablePage } from "@/components/admin/DataTablePage"
+import { DataTable, type Column } from "@/components/admin/DataTable"
 import type { Product } from "@/lib/types"
 
 const initialProducts: Product[] = [
@@ -121,96 +119,100 @@ export default function ProductsPage() {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">{t.title}</h1>
-        <Button className="gap-2" onClick={handleAddProduct}>
-          <Plus className="h-4 w-4" />
-          {t.addProduct}
-        </Button>
-      </div>
-
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder={t.searchPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+  const columns: Column<Product>[] = [
+    {
+      header: language === "en" ? "Product" : "المنتج",
+      className: "px-6",
+      headerClassName: "px-6",
+      cell: (product) => (
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-muted bg-muted/20">
+            <img
+              src={product.image || "/placeholder.svg"}
+              alt={language === "en" ? product.name : product.nameAr}
+              className="h-full w-full object-cover"
             />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{language === "en" ? "All Products" : "جميع المنتجات"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{language === "en" ? "Product" : "المنتج"}</TableHead>
-                  <TableHead>{t.category}</TableHead>
-                  <TableHead>{t.price}</TableHead>
-                  <TableHead>{t.stock}</TableHead>
-                  <TableHead>{t.status}</TableHead>
-                  <TableHead className="text-right">{t.actions}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={product.image || "/placeholder.svg"}
-                          alt={language === "en" ? product.name : product.nameAr}
-                          className="h-10 w-10 rounded-lg object-cover"
-                        />
-                        <span className="font-medium">{language === "en" ? product.name : product.nameAr}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{language === "en" ? product.category : product.categoryAr}</TableCell>
-                    <TableCell>${product.price}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>
-                      <div className="flex flex-col gap-1">
-                        <Badge variant={product.status === "in-stock" ? "default" : "destructive"}>
-                          {product.status === "in-stock" ? t.inStock : t.outOfStock}
-                        </Badge>
-                        {product.hasDiscount && (
-                          <Badge variant="outline" className="border-orange-500 text-orange-500 bg-orange-50">
-                            -{product.discountPercentage}%
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => product.id && handleDeleteProduct(product.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="flex flex-col text-left">
+            <span className="text-sm font-semibold text-foreground leading-tight">
+              {language === "en" ? product.name : product.nameAr}
+            </span>
+            <span className="text-[10px] text-muted-foreground mt-0.5 tracking-tight font-medium uppercase">ID: #{product.id}</span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      ),
+    },
+    {
+      header: t.category,
+      cell: (product) => (
+        <span className="text-xs font-medium text-muted-foreground">
+          {language === "en" ? product.category : product.categoryAr}
+        </span>
+      ),
+    },
+    {
+      header: t.price,
+      cell: (product) => <span className="text-sm font-semibold text-foreground">${product.price}</span>,
+    },
+    {
+      header: t.stock,
+      cell: (product) => (
+        <span className={`text-sm font-medium ${product.stock < 10 ? "text-destructive" : "text-foreground"}`}>
+          {product.stock} <span className="text-[10px] text-muted-foreground ml-0.5">UNITS</span>
+        </span>
+      ),
+    },
+    {
+      header: t.status,
+      cell: (product) => (
+        <div className="flex justify-center">
+          <Badge 
+            variant="outline"
+            className={product.status === "in-stock" 
+              ? "bg-emerald-50 text-emerald-600 border-emerald-200/50 dark:bg-emerald-950/20 dark:border-emerald-900/50 text-[10px] font-medium" 
+              : "text-[10px] font-medium"}
+          >
+            {product.status === "in-stock" ? t.inStock : t.outOfStock}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      header: t.actions,
+      headerClassName: "px-6",
+      className: "px-6",
+      cell: (product) => (
+        <div className="flex justify-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)} className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => product.id && handleDeleteProduct(product.id)} className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
+  return (
+    <>
+      <DataTablePage
+        title={t.title}
+        addButtonText={t.addProduct}
+        onAddClick={handleAddProduct}
+        searchPlaceholder={t.searchPlaceholder}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      >
+        <DataTable
+          columns={columns}
+          data={filteredProducts}
+          emptyMessage={language === "en" ? "No products found." : "لا توجد منتجات."}
+        />
+      </DataTablePage>
 
       <ProductModal
         isOpen={isModalOpen}
@@ -218,7 +220,6 @@ export default function ProductsPage() {
         onSave={handleSaveProduct}
         product={editingProduct}
       />
-    </div>
+    </>
   )
 }
-

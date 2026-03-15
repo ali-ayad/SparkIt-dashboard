@@ -1,16 +1,15 @@
-
 import { Suspense, useState } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { adminTranslations } from "@/lib/translations"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Search, Eye } from "lucide-react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Eye, Edit, Trash2 } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DataTablePage } from "@/components/admin/DataTablePage"
+import { DataTable, type Column } from "@/components/admin/DataTable"
+import type { Order } from "@/lib/types"
 
-const mockOrders = [
+const mockOrders: Order[] = [
   {
     id: "ORD-1234",
     customer: "Ahmed Hassan",
@@ -58,7 +57,7 @@ const mockOrders = [
   },
 ]
 
-function OrdersContent() {
+export default function OrdersPage() {
   const { language } = useLanguage()
   const t = adminTranslations[language].ordersManagement
   const [searchQuery, setSearchQuery] = useState("")
@@ -77,17 +76,17 @@ function OrdersContent() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-950/30 dark:text-yellow-400"
+        return "bg-yellow-50 text-yellow-600 border-yellow-200/50 dark:bg-yellow-950/20 dark:border-yellow-900/50"
       case "processing":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-950/30 dark:text-blue-400"
+        return "bg-blue-50 text-blue-600 border-blue-200/50 dark:bg-blue-950/20 dark:border-blue-900/50"
       case "shipped":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-950/30 dark:text-purple-400"
+        return "bg-purple-50 text-purple-600 border-purple-200/50 dark:bg-purple-950/20 dark:border-purple-900/50"
       case "delivered":
-        return "bg-green-100 text-green-800 dark:bg-green-950/30 dark:text-green-400"
+        return "bg-emerald-50 text-emerald-600 border-emerald-200/50 dark:bg-emerald-950/20 dark:border-emerald-900/50"
       case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-950/30 dark:text-red-400"
+        return "bg-red-50 text-red-600 border-red-200/50 dark:bg-red-950/20 dark:border-red-900/50"
       default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-950/30 dark:text-gray-400"
+        return "bg-muted text-muted-foreground"
     }
   }
 
@@ -108,100 +107,100 @@ function OrdersContent() {
     }
   }
 
+  const columns: Column<Order>[] = [
+    {
+      header: t.orderNumber,
+      className: "px-6",
+      headerClassName: "px-6",
+      cell: (order) => <span className="text-sm font-semibold text-primary">{order.id}</span>,
+    },
+    {
+      header: t.customer,
+      cell: (order) => <span className="text-sm font-medium text-foreground">{language === "en" ? order.customer : order.customerAr}</span>,
+    },
+    {
+      header: t.date,
+      cell: (order) => (
+        <span className="text-xs text-muted-foreground">
+          {new Date(order.date).toLocaleDateString(language === "en" ? "en-US" : "ar-EG", {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          })}
+        </span>
+      ),
+    },
+    {
+      header: language === "en" ? "Items" : "العناصر",
+      cell: (order) => (
+        <span className="text-xs font-medium text-muted-foreground">
+          {order.items} <span className="text-[10px] opacity-70">ITEMS</span>
+        </span>
+      ),
+    },
+    {
+      header: t.total,
+      cell: (order) => <span className="text-sm font-semibold text-foreground">${order.total}</span>,
+    },
+    {
+      header: t.status,
+      cell: (order) => (
+        <div className="flex justify-center">
+          <Badge variant="outline" className={`${getStatusColor(order.status)} text-[10px] font-medium`}>
+            {getStatusLabel(order.status)}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      header: language === "en" ? "Actions" : "الإجراءات",
+      headerClassName: "px-6",
+      className: "px-6",
+      cell: () => (
+        <div className="flex justify-center gap-1">
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors">
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">{t.title}</h1>
-      </div>
-
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder={language === "en" ? "Search orders..." : "البحث عن الطلبات..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder={language === "en" ? "Filter by status" : "تصفية حسب الحالة"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{language === "en" ? "All Status" : "جميع الحالات"}</SelectItem>
-                <SelectItem value="pending">{t.pending}</SelectItem>
-                <SelectItem value="processing">{t.processing}</SelectItem>
-                <SelectItem value="shipped">{t.shipped}</SelectItem>
-                <SelectItem value="delivered">{t.delivered}</SelectItem>
-                <SelectItem value="cancelled">{t.cancelled}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Orders Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{language === "en" ? "All Orders" : "جميع الطلبات"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t.orderNumber}</TableHead>
-                  <TableHead>{t.customer}</TableHead>
-                  <TableHead>{t.date}</TableHead>
-                  <TableHead>{language === "en" ? "Items" : "العناصر"}</TableHead>
-                  <TableHead>{t.total}</TableHead>
-                  <TableHead>{t.status}</TableHead>
-                  <TableHead className="text-right">{language === "en" ? "Actions" : "الإجراءات"}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{language === "en" ? order.customer : order.customerAr}</TableCell>
-                    <TableCell>
-                      {new Date(order.date).toLocaleDateString(language === "en" ? "en-US" : "ar-EG")}
-                    </TableCell>
-                    <TableCell>{order.items}</TableCell>
-                    <TableCell className="font-medium">${order.total}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(order.status)}>{getStatusLabel(order.status)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end">
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          <Eye className="h-4 w-4" />
-                          {t.viewDetails}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-export default function OrdersPage() {
-  return (
-    <Suspense fallback={null}>
-      <OrdersContent />
+    <Suspense fallback={<div>Loading...</div>}>
+      <DataTablePage
+        title={t.title}
+        searchPlaceholder={language === "en" ? "Search orders..." : "البحث عن الطلبات..."}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[150px] bg-background/50 border-muted">
+              <SelectValue placeholder={language === "en" ? "Status" : "الحالة"} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{language === "en" ? "All" : "الكل"}</SelectItem>
+              <SelectItem value="pending">{t.pending}</SelectItem>
+              <SelectItem value="processing">{t.processing}</SelectItem>
+              <SelectItem value="shipped">{t.shipped}</SelectItem>
+              <SelectItem value="delivered">{t.delivered}</SelectItem>
+              <SelectItem value="cancelled">{t.cancelled}</SelectItem>
+            </SelectContent>
+          </Select>
+        }
+      >
+        <DataTable
+          columns={columns}
+          data={filteredOrders}
+          emptyMessage={language === "en" ? "No orders found." : "لا توجد طلبات."}
+        />
+      </DataTablePage>
     </Suspense>
   )
 }
-

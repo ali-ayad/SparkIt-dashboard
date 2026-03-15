@@ -23,3 +23,22 @@ export interface Category {
   status: "active" | "inactive"
   productsCount: number
 }
+
+export interface Order {
+  id: string
+  customer: string
+  customerAr: string
+  date: string
+  total: number
+  status: "delivered" | "processing" | "shipped" | "pending" | "cancelled"
+  items: number
+}
+
+export interface Customer {
+  id: number
+  name: string
+  email: string
+  orders: number
+  spent: number
+  image?: string
+}
