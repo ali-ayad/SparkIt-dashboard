@@ -14,13 +14,13 @@ stages:
   - deploy
 
 # ----------------------
-# 1. TEST JOB: Using node (since this is a React app)
+# 1. TEST JOB: Using node for React/Vite app
 # ----------------------
 test-job:
   stage: test
   image: node:20
   script:
-    - npm install
+    - npm ci || npm install
     - npm run lint
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
@@ -45,12 +45,15 @@ build-job:
 deploy-job:
   stage: deploy
   script:
+    # 1. Login to Gitlab Registry
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker stop staging || true
-    - docker rm staging || true
+    # 2. Pull the latest image we just built
     - docker pull $IMAGE_NAME:$CI_COMMIT_REF_SLUG
-    - # Running on port 5001 as requested
-    - docker run -d --name staging -p 5001:80 $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+    # 3. Stop and Remove old container if it exists
+    - docker stop sparkit-dashboard || true
+    - docker rm sparkit-dashboard || true
+    # 4. Run the new React/Nginx container on port 8080 mapping to 80
+    - docker run -d --name sparkit-dashboard -p 8080:80 $IMAGE_NAME:$CI_COMMIT_REF_SLUG
   rules:
     - if: $CI_COMMIT_BRANCH == "staging"
     - if: $CI_COMMIT_BRANCH == "main"
