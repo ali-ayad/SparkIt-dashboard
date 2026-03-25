@@ -9,38 +9,45 @@ variables:
   IMAGE_NAME: registry.gitlab.com/ali-ayad/sparkit/spark-it-dash
 
 stages:
-  - build
-  - staging
+  - test
+  - package
+  - deploy
 
-# ----------------------
-# Build stage - runs on main and staging
-# ----------------------
-build:
-  stage: build
+# 1. TEST STEP: Check for linting/errors
+test:
+  image: node:20
+  stage: test
   script:
-    - echo "Docker info check"
-    - docker info
-    - echo "Building Docker image..."
-    - docker build -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG .
+    - npm install
+    - npm run lint
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "staging"
+
+# 2. PACKAGE STEP: Build and push the Docker image
+package:
+  stage: package
+  script:
     - echo "Logging into GitLab Container Registry..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - echo "Building Docker image..."
+    - docker build -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG .
     - echo "Pushing Docker image..."
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
-    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "staging"
 
-# ----------------------
-# Staging deployment - runs ONLY on staging branch
-# ----------------------
-staging:
-  stage: staging
+# 3. DEPLOY STEP: Deploy and run the container
+deploy:
+  stage: deploy
   script:
-    - echo "Deploying to staging environment..."
-    # Example: run the staging container
+    - echo "Deploying to environment..."
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker pull $IMAGE_NAME:$CI_COMMIT_REF_SLUG
     - docker stop sparkit-staging || true
     - docker rm sparkit-staging || true
     - docker run -d --name sparkit-staging -p 8080:80 $IMAGE_NAME:$CI_COMMIT_REF_SLUG
   rules:
-    - if: '$CI_COMMIT_BRANCH == "staging"'
+    - if: $CI_COMMIT_BRANCH == "staging"
+    - if: $CI_COMMIT_BRANCH == "main"
