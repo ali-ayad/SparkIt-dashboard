@@ -1,0 +1,33 @@
+# .gitlab-ci.yml
+image: docker:latest
+
+services:
+  - docker:dind  # Docker-in-Docker service
+
+variables:
+  DOCKER_DRIVER: overlay2
+  IMAGE_NAME: registry.gitlab.com/ali-ayad/sparkit/spark-it-dash:latest
+
+stages:
+  - build
+  - deploy
+
+# Step 1: Build Docker image
+build:
+  stage: build
+  script:
+    - echo "Building Docker image..."
+    - docker build -t $IMAGE_NAME .
+  only:
+    - main
+
+# Step 2 (Optional): Push to GitLab Container Registry
+deploy:
+  stage: deploy
+  script:
+    - echo "Logging in to GitLab Container Registry..."
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+    - echo "Pushing Docker image..."
+    - docker push $IMAGE_NAME
+  only:
+    - main
