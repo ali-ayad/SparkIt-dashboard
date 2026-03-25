@@ -10,13 +10,15 @@ variables:
 
 stages:
   - test
-  - package
+  - build
   - deploy
 
-# 1. TEST STEP: Check for linting/errors
-test:
-  image: node:20
+# ----------------------
+# 1. TEST JOB: Using node (since this is a React app)
+# ----------------------
+test-job:
   stage: test
+  image: node:20
   script:
     - npm install
     - npm run lint
@@ -24,30 +26,31 @@ test:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "staging"
 
-# 2. PACKAGE STEP: Build and push the Docker image
-package:
-  stage: package
+# ----------------------
+# 2. BUILD JOB: Build the docker image
+# ----------------------
+build-job:
+  stage: build
   script:
-    - echo "Logging into GitLab Container Registry..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - echo "Building Docker image..."
     - docker build -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG .
-    - echo "Pushing Docker image..."
     - docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "staging"
 
-# 3. DEPLOY STEP: Deploy and run the container
-deploy:
+# ----------------------
+# 3. DEPLOY JOB: Stop old container and run new one
+# ----------------------
+deploy-job:
   stage: deploy
   script:
-    - echo "Deploying to environment..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker stop staging || true
+    - docker rm staging || true
     - docker pull $IMAGE_NAME:$CI_COMMIT_REF_SLUG
-    - docker stop sparkit-staging || true
-    - docker rm sparkit-staging || true
-    - docker run -d --name sparkit-staging -p 8080:80 $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+    - # Running on port 5001 as requested
+    - docker run -d --name staging -p 5001:80 $IMAGE_NAME:$CI_COMMIT_REF_SLUG
   rules:
     - if: $CI_COMMIT_BRANCH == "staging"
     - if: $CI_COMMIT_BRANCH == "main"
