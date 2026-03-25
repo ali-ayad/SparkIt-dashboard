@@ -1,33 +1,35 @@
 # .gitlab-ci.yml
-image: docker:latest
+image: docker:20.10.16
 
 services:
-  - docker:dind  # Docker-in-Docker service
+  - docker:20.10.16-dind
 
 variables:
   DOCKER_DRIVER: overlay2
-  IMAGE_NAME: registry.gitlab.com/ali-ayad/sparkit/spark-it-dash:latest
+  # Use different tags for clarity
+  IMAGE_NAME: registry.gitlab.com/ali-ayad/sparkit/spark-it-dash
 
 stages:
   - build
-  - deploy
+  - staging
 
-# Step 1: Build Docker image
+# Build stage - runs on both main and staging
 build:
   stage: build
   script:
-    - echo "Building Docker image..."
-    - docker build -t $IMAGE_NAME .
-  only:
-    - main
+    - docker info
+    - docker build -t $IMAGE_NAME:$CI_COMMIT_REF_SLUG .
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker push $IMAGE_NAME:$CI_COMMIT_REF_SLUG
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "staging"
 
-# Step 2 (Optional): Push to GitLab Container Registry
-deploy:
-  stage: deploy
+# Staging stage - runs ONLY on the staging branch
+staging:
+  stage: staging
   script:
-    - echo "Logging in to GitLab Container Registry..."
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-    - echo "Pushing Docker image..."
-    - docker push $IMAGE_NAME
-  only:
-    - main
+    - echo "Deploying to staging environment..."
+    - # Add your specific staging deployment commands here (e.g., docker run, ssh, or cloud-specific CLI)
+  rules:
+    - if: $CI_COMMIT_BRANCH == "staging"
