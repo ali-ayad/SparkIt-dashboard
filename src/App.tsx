@@ -19,11 +19,11 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/admin/login" element={<Login />} />
+            <Route path="/login" element={<Login />} />
             
             {/* Protected Admin Routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route element={<AdminLayout />}>
+              <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="customers" element={<Customers />} />

@@ -14,24 +14,24 @@ export function AdminSidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem("admin_authenticated")
-    navigate("/admin/login")
+    navigate("/login")
   }
 
   const menuItems = [
-    { icon: LayoutDashboard, label: t.dashboard, href: "/admin/dashboard" },
-    { icon: Package, label: t.products, href: "/admin/products" },
-    { icon: Layers, label: t.categories, href: "/admin/categories" },
-    { icon: ShoppingCart, label: t.orders, href: "/admin/orders" },
-    { icon: Users, label: t.customers, href: "/admin/customers" },
-    { icon: BarChart3, label: t.analytics, href: "/admin/analytics" },
-    { icon: Settings, label: t.settings, href: "/admin/settings" },
+    { icon: LayoutDashboard, label: t.dashboard, href: "/dashboard" },
+    { icon: Package, label: t.products, href: "/products" },
+    { icon: Layers, label: t.categories, href: "/categories" },
+    { icon: ShoppingCart, label: t.orders, href: "/orders" },
+    { icon: Users, label: t.customers, href: "/customers" },
+    { icon: BarChart3, label: t.analytics, href: "/analytics" },
+    { icon: Settings, label: t.settings, href: "/settings" },
   ]
 
   return (
     <div className="flex h-full w-full flex-col border-e border-border bg-card">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-border px-6">
-        <Link to="/admin/dashboard" className="flex items-center">
+        <Link to="/dashboard" className="flex items-center">
           <img
             src="/images/sparkit-logo.png"
             alt="SparkIT"
