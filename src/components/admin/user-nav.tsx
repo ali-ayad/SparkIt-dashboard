@@ -1,4 +1,6 @@
+"use client"
 
+import { useRouter } from "next/navigation"
 import { LogOut, User, Settings } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -11,17 +13,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useLanguage } from "@/lib/language-context"
-import { useNavigate } from "react-router-dom"
+import { ROUTES } from "@/lib/constants"
 
 export function UserNav() {
-  const { language } = useLanguage()
-  const navigate = useNavigate()
-
-  // In a real app, you would clear the auth token here
-  const handleLogout = () => {
-    navigate("/admin/login")
-  }
+  const router = useRouter()
 
   return (
     <DropdownMenu>
@@ -36,7 +31,7 @@ export function UserNav() {
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Admin User</p>
+            <p className="text-sm font-medium leading-none">المسؤول</p>
             <p className="text-xs leading-none text-muted-foreground">
               admin@sparkit.com
             </p>
@@ -46,17 +41,17 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <User className="mr-2 h-4 w-4" />
-            <span>{language === "en" ? "Profile" : "الملف الشخصي"}</span>
+            <span>الملف الشخصي</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate("/admin/settings")}>
+          <DropdownMenuItem onClick={() => router.push(ROUTES.settings)}>
             <Settings className="mr-2 h-4 w-4" />
-            <span>{language === "en" ? "Settings" : "الإعدادات"}</span>
+            <span>الإعدادات</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+        <DropdownMenuItem className="text-destructive focus:text-destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>{language === "en" ? "Log out" : "تسجيل الخروج"}</span>
+          <span>تسجيل الخروج</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

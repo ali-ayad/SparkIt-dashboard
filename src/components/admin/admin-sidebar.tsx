@@ -1,49 +1,52 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
-import { LayoutDashboard, Package, Layers, ShoppingCart, Users, BarChart3, Settings, LogOut } from "lucide-react"
-import { useLanguage } from "@/lib/language-context"
-import { adminTranslations } from "@/lib/translations"
+"use client"
+
+import Link from "next/link"
+import Image from "next/image"
+import { usePathname } from "next/navigation"
+import {
+  LayoutDashboard,
+  Package,
+  Layers,
+  ShoppingCart,
+  Users,
+  UserCog,
+  ScrollText,
+  BarChart3,
+  Settings,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { ROUTES } from "@/lib/constants"
+
+const menuItems = [
+  { icon: LayoutDashboard, label: "لوحة التحكم", href: ROUTES.dashboard },
+  { icon: Package, label: "المنتجات", href: ROUTES.products },
+  { icon: Layers, label: "الفئات", href: ROUTES.categories },
+  { icon: ShoppingCart, label: "الطلبات", href: ROUTES.orders },
+  { icon: Users, label: "العملاء", href: ROUTES.customers },
+  { icon: UserCog, label: "المستخدمون", href: ROUTES.users },
+  { icon: BarChart3, label: "التحليلات", href: ROUTES.analytics },
+  { icon: ScrollText, label: "سجل النشاط", href: ROUTES.logs },
+  { icon: Settings, label: "الإعدادات", href: ROUTES.settings },
+]
 
 export function AdminSidebar() {
-  const location = useLocation()
-  const pathname = location.pathname
-  const navigate = useNavigate()
-  const { language } = useLanguage()
-  const t = adminTranslations[language].sidebar
-
-  const handleLogout = () => {
-    localStorage.removeItem("admin_authenticated")
-    navigate("/login")
-  }
-
-  const menuItems = [
-    { icon: LayoutDashboard, label: t.dashboard, href: "/dashboard" },
-    { icon: Package, label: t.products, href: "/products" },
-    { icon: Layers, label: t.categories, href: "/categories" },
-    { icon: ShoppingCart, label: t.orders, href: "/orders" },
-    { icon: Users, label: t.customers, href: "/customers" },
-    { icon: BarChart3, label: t.analytics, href: "/analytics" },
-    { icon: Settings, label: t.settings, href: "/settings" },
-  ]
+  const pathname = usePathname()
 
   return (
     <div className="flex h-full w-full flex-col border-e border-border bg-card">
-      {/* Logo */}
       <div className="flex h-16 items-center border-b border-border px-6">
-        <Link to="/dashboard" className="flex items-center">
-          <img
+        <Link href={ROUTES.dashboard} className="flex items-center">
+          <Image
             src="/images/sparkit-logo.png"
             alt="SparkIT"
-            className={cn(
-              "h-16 w-auto object-contain transform transition-transform hover:scale-105",
-              language === "ar" ? "object-right" : "object-left"
-            )}
+            width={120}
+            height={64}
+            className="h-16 w-auto object-contain object-right transform transition-transform hover:scale-105"
+            priority
           />
         </Link>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon
@@ -51,7 +54,7 @@ export function AdminSidebar() {
           return (
             <Link
               key={item.href}
-              to={item.href}
+              href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 isActive
@@ -65,19 +68,6 @@ export function AdminSidebar() {
           )
         })}
       </nav>
-
-      {/* Logout Button */}
-      <div className="border-t border-border p-4">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="h-5 w-5" />
-          <span>{t.logout}</span>
-        </Button>
-      </div>
     </div>
   )
 }
-
