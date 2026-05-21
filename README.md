@@ -2,7 +2,7 @@
 
 A premium, high-performance administrative dashboard designed for modern e-commerce management. Built with speed, aesthetics, and user experience in mind.
 
-![SparkIT Dashboard Preview](./src/assets/image.png)
+![SparkIT Dashboard Preview](./public/images/dashboard-preview.png)
 
 ## 🚀 Overview
 
@@ -10,15 +10,11 @@ SparkIT Dashboard provides a comprehensive suite of tools for store administrato
 
 ## 🛠️ Tech Stack
 
-- **Core**: [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool**: [Vite 7](https://vitejs.dev/)
+- **Core**: [Next.js 15 (App Router)](https://nextjs.org/) & [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **UI Components**: [Shadcn UI](https://ui.shadcn.com/)
-- **State & Logic**: 
-  - [Lucide React](https://lucide.dev/) for iconography
-  - [React Router 7](https://reactrouter.com/) for internal navigation
-  - Custom Language Context for RTL/LTR support
-- **Experience**: Premium animations using `tailwindcss-animate` and CSS transitions.
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) & [Radix Primitives](https://www.radix-ui.com/)
+- **Icons & Charts**: [Lucide React](https://lucide.dev/) & [Recharts](https://recharts.org/)
+- **Experience**: Premium animations using `tailwindcss-animate` and micro-transitions.
 
 ## 💎 Features
 
@@ -61,10 +57,12 @@ SparkIT Dashboard provides a comprehensive suite of tools for store administrato
 
 ## 📂 Project Structure
 
-- `src/components`: Reusable UI components and page-specific layouts.
-- `src/pages`: Main view components for Dashboard, Products, etc.
-- `src/lib`: Context providers, utility functions, and global constants.
-- `src/assets`: Static assets including the hero identity image.
+- `src/app`: Next.js pages, layouts, and API route handlers.
+- `src/components`: Reusable UI components (buttons, input, dialogs).
+- `src/features`: Feature-based modules (products, dashboard, auth, orders, customers).
+- `src/services`: Data-fetching and API service integration layer.
+- `src/lib`: Utilities, helper functions, and global constants.
+- `public`: Static assets including images and logos.
 
 ---
 Built with ❤️ by the SparkIT Team.
